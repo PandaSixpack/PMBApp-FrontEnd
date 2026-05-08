@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import logo from '../assets/img/logo.jpg';
 import { 
   LayoutDashboard, 
   UserCircle, 
@@ -32,6 +33,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Pendaftaran', icon: FileText, path: '/dashboard/registration' },
     { name: 'Pembayaran', icon: CreditCard, path: '/dashboard/payment' },
     { name: 'Ujian Online', icon: GraduationCap, path: '/dashboard/exam' },
+    { name: 'Daftar Ulang', icon: ClipboardList, path: '/dashboard/re-registration' },
   ];
 
   const adminNav = [
@@ -62,13 +64,11 @@ const DashboardLayout = ({ children }) => {
         lg:relative lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="h-full flex flex-col">
-          <div className="p-6 flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <GraduationCap className="text-white" size={24} />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-800 leading-tight">Politeknik</h1>
-              <p className="text-xs text-slate-500 font-medium">Bisnis Digital</p>
+          <div className="p-6 flex items-center gap-3 border-b border-slate-50">
+            <img src={logo} alt="Logo Polbis" className="h-10 w-auto rounded-lg" />
+            <div className="overflow-hidden">
+              <h1 className="text-sm font-bold text-slate-800 leading-tight truncate">POLITEKNIK</h1>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight truncate">Bisnis Digital Indonesia</p>
             </div>
           </div>
 

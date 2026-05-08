@@ -10,7 +10,9 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  ClipboardCheck,
+  Lock
 } from 'lucide-react';
 
 const StudentDashboard = () => {
@@ -36,32 +38,39 @@ const StudentDashboard = () => {
 
   const steps = [
     { 
-      title: 'Lengkapi Profil', 
+      title: '1. Lengkapi Profil', 
       desc: 'Isi biodata dan data asal sekolah', 
       icon: UserCircle, 
       path: '/dashboard/profile',
       status: data?.biodata?.nik ? 'completed' : 'pending'
     },
     { 
-      title: 'Pilih Program Studi', 
+      title: '2. Pilih Program Studi', 
       desc: 'Tentukan masa depan karirmu', 
       icon: FileText, 
       path: '/dashboard/registration',
       status: data?.selectedMajor ? 'completed' : 'pending'
     },
     { 
-      title: 'Pembayaran', 
+      title: '3. Pembayaran', 
       desc: 'Biaya pendaftaran & seleksi', 
       icon: CreditCard, 
       path: '/dashboard/payment',
       status: data?.paymentStatus === 'verified' ? 'completed' : data?.paymentStatus === 'paid' ? 'processing' : 'pending'
     },
     { 
-      title: 'Ujian Seleksi', 
+      title: '4. Ujian Seleksi', 
       desc: 'Uji kemampuan akademik online', 
       icon: GraduationCap, 
       path: '/dashboard/exam',
       status: data?.examStatus === 'completed' ? 'completed' : 'pending'
+    },
+    { 
+      title: '5. Registrasi Ulang', 
+      desc: 'Lengkapi berkas setelah dinyatakan LULUS', 
+      icon: ClipboardCheck, 
+      path: '/dashboard/re-registration',
+      status: data?.admissionStatus === 'lulus' ? (data?.reRegistrationStatus === 'completed' ? 'completed' : 'pending') : 'locked'
     },
   ];
 
@@ -79,13 +88,17 @@ const StudentDashboard = () => {
             {steps.map((step, idx) => (
               <Link 
                 key={idx} 
-                to={step.path}
-                className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md hover:border-primary-200 transition-all group"
+                to={step.status === 'locked' ? '#' : step.path}
+                className={`bg-white p-6 rounded-3xl border border-slate-100 shadow-sm transition-all group ${
+                  step.status === 'locked' ? 'opacity-60 grayscale cursor-not-allowed' : 'hover:shadow-md hover:border-primary-200'
+                }`}
+                onClick={(e) => step.status === 'locked' && e.preventDefault()}
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className={`p-3 rounded-2xl ${
                     step.status === 'completed' ? 'bg-green-50 text-green-600' : 
-                    step.status === 'processing' ? 'bg-amber-50 text-amber-600' : 'bg-primary-50 text-primary-600'
+                    step.status === 'processing' ? 'bg-amber-50 text-amber-600' : 
+                    step.status === 'locked' ? 'bg-slate-100 text-slate-400' : 'bg-primary-50 text-primary-600'
                   }`}>
                     <step.icon size={24} />
                   </div>
@@ -93,6 +106,8 @@ const StudentDashboard = () => {
                     <CheckCircle2 size={20} className="text-green-500" />
                   ) : step.status === 'processing' ? (
                     <Clock size={20} className="text-amber-500 animate-pulse" />
+                  ) : step.status === 'locked' ? (
+                    <Lock size={20} className="text-slate-300" />
                   ) : (
                     <ChevronRight size={20} className="text-slate-300 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
                   )}
@@ -124,10 +139,18 @@ const StudentDashboard = () => {
               </div>
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${data?.admissionStatus === 'lulus' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                  <div className={`w-2 h-2 rounded-full ${
+                    data?.admissionStatus === 'lulus' ? 'bg-green-500' : 
+                    data?.admissionStatus === 'tidak_lulus' ? 'bg-red-500' :
+                    data?.admissionStatus === 'menunggu_review' ? 'bg-amber-500' : 'bg-blue-500'
+                  }`}></div>
                   <span className="text-sm font-medium text-slate-600">Hasil Seleksi</span>
                 </div>
-                <span className={`text-sm font-bold capitalize ${data?.admissionStatus === 'lulus' ? 'text-green-600' : 'text-blue-600'}`}>
+                <span className={`text-sm font-bold capitalize ${
+                  data?.admissionStatus === 'lulus' ? 'text-green-600' : 
+                  data?.admissionStatus === 'tidak_lulus' ? 'text-red-600' :
+                  data?.admissionStatus === 'menunggu_review' ? 'text-amber-600' : 'text-blue-600'
+                }`}>
                   {(data?.admissionStatus || 'pending').replace('_', ' ')}
                 </span>
               </div>

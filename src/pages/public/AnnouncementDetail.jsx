@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../../api/axios';
+import api, { BASE_URL } from '../../api/axios';
 import { Calendar, User, ArrowLeft, Loader2, Share2 } from 'lucide-react';
 
 const AnnouncementDetail = () => {
@@ -78,7 +78,7 @@ const AnnouncementDetail = () => {
           {announcement.thumbnail && (
             <div className="w-full h-[400px] overflow-hidden">
               <img 
-                src={announcement.thumbnail} 
+                src={`${BASE_URL}/${announcement.thumbnail}`} 
                 alt={announcement.title} 
                 className="w-full h-full object-cover"
               />

@@ -7,6 +7,7 @@ import Profile from './pages/student/Profile';
 import Registration from './pages/student/Registration';
 import Payment from './pages/student/Payment';
 import Exam from './pages/student/Exam';
+import ReRegistration from './pages/student/ReRegistration';
 import StudentDashboard from './pages/student/Dashboard';
 import AdminStats from './pages/admin/Dashboard';
 import AdminApplicants from './pages/admin/Applicants';
@@ -47,6 +48,7 @@ function App() {
           <Route path="/dashboard/registration" element={<DashboardLayout><Registration /></DashboardLayout>} />
           <Route path="/dashboard/payment" element={<DashboardLayout><Payment /></DashboardLayout>} />
           <Route path="/dashboard/exam" element={<DashboardLayout><Exam /></DashboardLayout>} />
+          <Route path="/dashboard/re-registration" element={<DashboardLayout><ReRegistration /></DashboardLayout>} />
         </Route>
 
         {/* Admin Routes */}

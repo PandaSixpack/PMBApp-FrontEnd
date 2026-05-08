@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import logo from '../assets/img/logo.jpg';
 import {
   Menu,
   X,
@@ -49,12 +50,10 @@ const PublicLayout = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                <GraduationCap className="text-white" size={24} />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-slate-900 leading-tight">PMB Politeknik</h1>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Bisnis Digital Indonesia</p>
+              <img src={logo} alt="Logo Polbis" className="h-12 w-auto rounded-lg" />
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-bold text-slate-900 leading-tight">Politeknik Bisnis Digital Indonesia</h1>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Penerimaan Mahasiswa Baru</p>
               </div>
             </Link>
 

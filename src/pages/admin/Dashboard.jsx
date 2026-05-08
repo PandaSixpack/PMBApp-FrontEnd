@@ -56,12 +56,14 @@ const AdminStats = () => {
 
   if (loading || !stats) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary-600" size={40} /></div>;
 
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  
   const chartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: (stats.monthlyStats || []).map(s => monthNames[s._id - 1]),
     datasets: [
       {
         label: 'Pendaftar Baru',
-        data: [12, 19, 30, 45, 60, 75], // Dummy fallback
+        data: (stats.monthlyStats || []).map(s => s.count),
         fill: true,
         backgroundColor: 'rgba(14, 165, 233, 0.1)',
         borderColor: 'rgb(14, 165, 233)',
@@ -71,10 +73,10 @@ const AdminStats = () => {
   };
 
   const statCards = [
-    { title: 'Total Pendaftar', value: stats.totalApplicants, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { title: 'Jumlah Lulus', value: stats.totalLulus, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50' },
-    { title: 'Pending Review', value: stats.totalPending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { title: 'Pembayaran Valid', value: stats.totalVerifiedPayments, icon: CreditCard, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { title: 'Total Pendaftar', value: stats.totalApplicants || 0, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { title: 'Jumlah Lulus', value: stats.totalLulus || 0, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50' },
+    { title: 'Menunggu Review', value: stats.totalPending || 0, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { title: 'Pembayaran Valid', value: stats.totalVerifiedPayments || 0, icon: CreditCard, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
 
   return (
@@ -86,7 +88,7 @@ const AdminStats = () => {
         </div>
         <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 text-slate-600 text-sm font-medium">
           <Calendar size={18} />
-          <span>April 2026</span>
+          <span>{new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</span>
         </div>
       </div>
 
@@ -108,9 +110,6 @@ const AdminStats = () => {
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-xl font-bold text-slate-800">Tren Pendaftaran</h3>
-            <span className="flex items-center gap-1 text-green-600 text-sm font-bold bg-green-50 px-3 py-1 rounded-full">
-              <TrendingUp size={16} /> +24%
-            </span>
           </div>
           <div className="h-80">
             <Line data={chartData} options={{ maintainAspectRatio: false }} />
@@ -122,10 +121,10 @@ const AdminStats = () => {
           <div className="h-80">
             <Bar 
               data={{
-                labels: ['D4 TRPL', 'D4 Bisnis Digital', 'D4 Logistik'],
+                labels: (stats.majorStats || []).map(m => m._id || 'Belum Pilih'),
                 datasets: [{
                   label: 'Pendaftar',
-                  data: [45, 30, 25],
+                  data: (stats.majorStats || []).map(m => m.count),
                   backgroundColor: '#0ea5e9',
                   borderRadius: 8
                 }]
@@ -142,18 +141,26 @@ const AdminStats = () => {
         </div>
         <div className="p-8">
           <div className="space-y-6">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500">
-                  <Users size={20} />
+            {!stats.recentApplicants || stats.recentApplicants.length === 0 ? (
+              <p className="text-center text-slate-400 py-4">Belum ada aktivitas pendaftaran</p>
+            ) : (
+              stats.recentApplicants.map((applicant) => (
+                <div key={applicant._id} className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500">
+                    <Users size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-slate-800 font-semibold">{applicant.user?.name || 'User'}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {applicant.selectedMajor ? `Mendaftar di ${applicant.selectedMajor}` : 'Baru saja melengkapi profil'}
+                    </p>
+                  </div>
+                  <span className="text-xs text-slate-400 font-medium">
+                    {new Date(applicant.createdAt).toLocaleDateString('id-ID')}
+                  </span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-slate-800 font-semibold">Mahasiswa baru mendaftar</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Calon mahasiswa #00{item} baru saja menyelesaikan profil</p>
-                </div>
-                <span className="text-xs text-slate-400 font-medium">5 menit yang lalu</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

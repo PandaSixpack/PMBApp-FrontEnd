@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../api/axios';
+import api, { BASE_URL } from '../../api/axios';
 import { 
   Plus, 
   Trash2, 
@@ -11,7 +11,8 @@ import {
   FileText,
   CheckCircle2,
   Clock,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Upload
 } from 'lucide-react';
 
 const AdminAnnouncements = () => {
@@ -19,6 +20,8 @@ const AdminAnnouncements = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     thumbnail: '',
@@ -41,18 +44,40 @@ const AdminAnnouncements = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setThumbnailFile(file);
+      setThumbnailPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('content', formData.content);
+    data.append('status', formData.status);
+    if (thumbnailFile) {
+      data.append('thumbnail', thumbnailFile);
+    }
+
     try {
       if (editingItem) {
-        await api.put(`/announcements/${editingItem._id}`, formData);
+        await api.put(`/announcements/${editingItem._id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         alert('Pengumuman diperbarui!');
       } else {
-        await api.post('/announcements', formData);
+        await api.post('/announcements', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         alert('Pengumuman dibuat!');
       }
       setShowModal(false);
       setEditingItem(null);
+      setThumbnailFile(null);
+      setThumbnailPreview('');
       setFormData({ title: '', thumbnail: '', content: '', status: 'draft' });
       fetchAnnouncements();
     } catch (err) {
@@ -82,6 +107,8 @@ const AdminAnnouncements = () => {
         <button 
           onClick={() => {
             setEditingItem(null);
+            setThumbnailFile(null);
+            setThumbnailPreview('');
             setFormData({ title: '', thumbnail: '', content: '', status: 'draft' });
             setShowModal(true);
           }}
@@ -113,9 +140,9 @@ const AdminAnnouncements = () => {
                   <tr key={item._id} className="hover:bg-slate-50/50 transition-colors text-sm">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
                           {item.thumbnail ? (
-                            <img src={item.thumbnail} className="w-full h-full object-cover rounded-lg" alt="" />
+                            <img src={`${BASE_URL}/${item.thumbnail}`} className="w-full h-full object-cover" alt="" />
                           ) : (
                             <FileText className="text-slate-400" size={20} />
                           )}
@@ -142,6 +169,8 @@ const AdminAnnouncements = () => {
                         <button 
                           onClick={() => {
                             setEditingItem(item);
+                            setThumbnailFile(null);
+                            setThumbnailPreview(item.thumbnail ? `${BASE_URL}/${item.thumbnail}` : '');
                             setFormData({
                               title: item.title,
                               thumbnail: item.thumbnail || '',
@@ -179,7 +208,7 @@ const AdminAnnouncements = () => {
               <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600"><X size={24} /></button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto flex-1">
+            <form id="announcement-form" onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto flex-1">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-6">
                   <div className="space-y-2">
@@ -209,22 +238,29 @@ const AdminAnnouncements = () => {
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">Thumbnail URL</label>
+                    <label className="text-sm font-bold text-slate-700">Thumbnail Pengumuman</label>
                     <div className="relative">
-                      <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                       <input
-                        type="url"
-                        value={formData.thumbnail}
-                        onChange={(e) => setFormData({...formData, thumbnail: e.target.value})}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
-                        placeholder="https://image-url.com/..."
+                        type="file"
+                        id="thumbnail-upload"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleFileChange}
                       />
+                      <label
+                        htmlFor="thumbnail-upload"
+                        className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 hover:bg-slate-100 hover:border-primary-300 transition-all cursor-pointer overflow-hidden group"
+                      >
+                        {thumbnailPreview ? (
+                          <img src={thumbnailPreview} className="w-full h-full object-cover" alt="Preview" />
+                        ) : (
+                          <>
+                            <Upload className="text-slate-400 mb-2 group-hover:text-primary-500" size={32} />
+                            <span className="text-xs font-medium text-slate-500 group-hover:text-primary-600">Pilih Foto Thumbnail</span>
+                          </>
+                        )}
+                      </label>
                     </div>
-                    {formData.thumbnail && (
-                      <div className="mt-4 aspect-video rounded-2xl overflow-hidden border-2 border-slate-100">
-                        <img src={formData.thumbnail} className="w-full h-full object-cover" alt="Preview" />
-                      </div>
-                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -245,6 +281,7 @@ const AdminAnnouncements = () => {
             <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
               <button
                 type="submit"
+                form="announcement-form"
                 className="bg-primary-600 hover:bg-primary-700 text-white font-bold px-10 py-3 rounded-xl shadow-lg shadow-primary-200 transition-all"
               >
                 {editingItem ? 'Perbarui Pengumuman' : 'Simpan Pengumuman'}

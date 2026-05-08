@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../api/axios';
+import api, { BASE_URL } from '../../api/axios';
 import { Calendar, User, ArrowRight, Loader2, BookOpen } from 'lucide-react';
 
 const PublicAnnouncements = () => {
@@ -51,7 +51,7 @@ const PublicAnnouncements = () => {
             >
               <div className="h-64 overflow-hidden relative">
                 <img 
-                  src={item.thumbnail || "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"} 
+                  src={item.thumbnail ? `${BASE_URL}/${item.thumbnail}` : "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"} 
                   alt={item.title} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />

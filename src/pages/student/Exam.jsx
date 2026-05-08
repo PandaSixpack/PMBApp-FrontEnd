@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axios';
-import { Clock, GraduationCap, AlertTriangle, CheckCircle2, Loader2, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Clock, GraduationCap, AlertTriangle, CheckCircle2, Loader2, ArrowRight, ChevronRight, ChevronLeft, FileText } from 'lucide-react';
 
 const Exam = () => {
   const [loading, setLoading] = useState(true);
@@ -235,60 +235,71 @@ const Exam = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {exams.map((exam) => {
-              const result = examResults.find(r => r.examId === exam._id);
+              const result = examResults.find(r => 
+                (typeof r.examId === 'object' ? r.examId._id : r.examId) === exam._id
+              );
               return (
-                <div key={exam._id} className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all group">
-                  <div className="p-8">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors ${
-                      result ? 'bg-blue-100 text-blue-600' : 'bg-primary-50 text-primary-600'
-                    }`}>
-                      <GraduationCap size={28} />
+                <div key={exam._id} className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all group flex flex-col h-full">
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
+                        result ? 'bg-green-100 text-green-600' : 'bg-primary-50 text-primary-600'
+                      }`}>
+                        <GraduationCap size={28} />
+                      </div>
+                      {result && (
+                        <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center gap-1">
+                          <CheckCircle2 size={12} /> SELESAI
+                        </span>
+                      )}
                     </div>
                     <h3 className="text-xl font-bold text-slate-800 mb-1">{exam.title}</h3>
                     <p className="text-slate-500 text-sm mb-6">{exam.category}</p>
                     
-                    <div className="space-y-3 mb-8">
+                    <div className="space-y-3">
                       <div className="flex items-center gap-3 text-sm text-slate-600">
                         <Clock size={18} className="text-slate-400" />
                         <span>Durasi: <strong>{exam.duration} Menit</strong></span>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-slate-600">
-                        <CheckCircle2 size={18} className="text-slate-400" />
-                        <span>Passing Grade: <strong>{exam.passingGrade}</strong></span>
+                        <FileText size={18} className="text-slate-400" />
+                        <span>Tipe: <strong>Pilihan Ganda</strong></span>
                       </div>
                     </div>
-
-                    {result ? (
-                      <div className="w-full py-4 rounded-2xl text-center font-bold border bg-blue-50 text-blue-700 border-blue-100">
-                        <CheckCircle2 size={18} className="inline-block mr-2" />
-                        Sudah Dikerjakan
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => startExam(exam._id)}
-                        className="w-full flex items-center justify-center gap-2 py-4 bg-slate-50 hover:bg-primary-600 hover:text-white text-primary-600 font-bold rounded-2xl transition-all"
-                      >
-                        Mulai Ujian <ArrowRight size={18} />
-                      </button>
-                    )}
                   </div>
+
+                  <div className="p-6 pt-0 mt-auto">
+                     {result ? (
+                       <button
+                         disabled
+                         className="w-full py-3 px-6 bg-slate-100 text-slate-400 rounded-xl font-bold flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed"
+                       >
+                         <CheckCircle2 size={20} /> Ujian Sudah Dilakukan
+                       </button>
+                     ) : (
+                       <button
+                         onClick={() => startExam(exam._id)}
+                         disabled={applicant?.paymentStatus !== 'verified'}
+                         className="w-full py-3 px-6 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl font-bold shadow-lg shadow-primary-200 transition-all flex items-center justify-center gap-2 group"
+                       >
+                         Mulai Ujian <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                       </button>
+                     )}
+                   </div>
                 </div>
               );
             })}
           </div>
 
           {examResults.length === exams.length && exams.length > 0 && (
-            <div className={`p-8 rounded-3xl border text-center ${
-              applicant.admissionStatus === 'lulus' ? 'bg-green-600 text-white shadow-lg shadow-green-200' : 'bg-red-600 text-white shadow-lg shadow-red-200'
-            }`}>
-              <h2 className="text-2xl font-bold">Hasil Seleksi Akhir</h2>
+            <div className="p-8 rounded-3xl border text-center bg-blue-600 text-white shadow-lg shadow-blue-200">
+              <h2 className="text-2xl font-bold">Ujian Selesai</h2>
               <p className="mt-2 text-lg opacity-90">
-                Status: <span className="font-bold uppercase tracking-widest">{(applicant.admissionStatus || 'pending').replace('_', ' ')}</span>
+                Terima kasih telah menyelesaikan seluruh rangkaian ujian seleksi.
               </p>
               <p className="mt-4 text-sm opacity-80 max-w-xl mx-auto">
-                {applicant.admissionStatus === 'lulus' 
-                  ? 'Selamat! Anda dinyatakan lulus seleksi di semua modul ujian. Silakan cek dashboard secara berkala untuk informasi pendaftaran ulang.'
-                  : 'Mohon maaf, Anda belum memenuhi kriteria kelulusan di salah satu atau lebih modul ujian.'}
+                Data jawaban Anda telah kami simpan. Tim seleksi akan melakukan peninjauan terhadap hasil ujian Anda. 
+                Silakan cek dashboard secara berkala untuk melihat pengumuman hasil seleksi akhir yang akan diputuskan oleh admin.
               </p>
             </div>
           )}
