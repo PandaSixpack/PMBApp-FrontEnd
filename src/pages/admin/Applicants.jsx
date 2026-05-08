@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import api from '../../api/axios';
 import { 
   Users, 
   Search, 
@@ -16,7 +16,9 @@ import {
   ChevronRight,
   X,
   MapPin,
-  School
+  School,
+  Download,
+  Award
 } from 'lucide-react';
 
 const AdminApplicants = () => {
@@ -24,14 +26,66 @@ const AdminApplicants = () => {
   const [applicants, setApplicants] = useState([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterPayment, setFilterPayment] = useState('all');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({});
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [examResults, setExamResults] = useState([]);
+  const [loadingResults, setLoadingResults] = useState(false);
 
   useEffect(() => {
     fetchApplicants();
   }, [page]);
+
+  const handleDownloadCSV = () => {
+    if (filteredApplicants.length === 0) return;
+    
+    const headers = ['Nama', 'Email', 'Prodi', 'Gelombang', 'Status Pembayaran', 'Status Seleksi'];
+    const csvData = filteredApplicants.map(app => [
+      `"${app.user?.name || ''}"`,
+      `"${app.user?.email || ''}"`,
+      `"${app.selectedMajor || ''}"`,
+      `"${app.gelombang || ''}"`,
+      `"${app.paymentStatus || ''}"`,
+      `"${app.admissionStatus || ''}"`
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `pendaftar_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const fetchExamResults = async (userId) => {
+    setLoadingResults(true);
+    try {
+      const res = await api.get(`/exams/results?userId=${userId}`);
+      setExamResults(res.data.data);
+      setLoadingResults(false);
+    } catch (err) {
+      console.error('Error fetching exam results:', err);
+      setLoadingResults(false);
+    }
+  };
+
+  const handleOpenDetail = (app) => {
+    setSelectedApplicant(app);
+    setShowDetailModal(true);
+    if (app.user?._id) {
+      fetchExamResults(app.user._id);
+    }
+  };
 
   const fetchApplicants = async () => {
     try {
@@ -48,7 +102,8 @@ const AdminApplicants = () => {
   const handleStatusChange = async (id, status) => {
     try {
       await api.put(`/applicants/${id}`, { admissionStatus: status });
-      alert(`Status seleksi berhasil diubah menjadi ${status}`);
+      const statusText = status.replace('_', ' ').toUpperCase();
+      alert(`Status seleksi berhasil diubah menjadi ${statusText}`);
       fetchApplicants();
     } catch (err) {
       alert('Gagal mengubah status');
@@ -62,16 +117,19 @@ const AdminApplicants = () => {
         alert('Data berhasil dihapus');
         fetchApplicants();
       } catch (err) {
-        alert('Gagal menghapus data (Backend mungkin belum mendukung delete)');
+        alert('Gagal menghapus data');
       }
     }
   };
 
   const filteredApplicants = applicants.filter(app => {
-    const matchesSearch = app.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
-                         app.user?.email?.toLowerCase().includes(search.toLowerCase());
+    const name = app.user?.name || '';
+    const email = app.user?.email || '';
+    const matchesSearch = name.toLowerCase().includes(search.toLowerCase()) ||
+                         email.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filterStatus === 'all' || app.admissionStatus === filterStatus;
-    return matchesSearch && matchesStatus;
+    const matchesPayment = filterPayment === 'all' || app.paymentStatus === filterPayment;
+    return matchesSearch && matchesStatus && matchesPayment;
   });
 
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-primary-600" size={40} /></div>;
@@ -83,6 +141,12 @@ const AdminApplicants = () => {
           <h1 className="text-2xl font-bold text-slate-900">Manajemen Mahasiswa</h1>
           <p className="text-slate-500">Kelola pendaftar dan verifikasi kelulusan</p>
         </div>
+        <button 
+          onClick={handleDownloadCSV}
+          className="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm"
+        >
+          <Download size={20} /> Export CSV
+        </button>
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
@@ -97,18 +161,33 @@ const AdminApplicants = () => {
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Filter size={18} className="text-slate-400" />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-600 focus:ring-2 focus:ring-primary-500 outline-none"
-            >
-              <option value="all">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="lulus">Lulus</option>
-              <option value="tidak_lulus">Tidak Lulus</option>
-            </select>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Filter size={18} className="text-slate-400" />
+              <select
+                value={filterPayment}
+                onChange={(e) => setFilterPayment(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-600 focus:ring-2 focus:ring-primary-500 outline-none"
+              >
+                <option value="all">Status Bayar</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Sudah Bayar</option>
+                <option value="verified">Terverifikasi</option>
+                <option value="rejected">Ditolak</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-600 focus:ring-2 focus:ring-primary-500 outline-none"
+              >
+                <option value="all">Status Seleksi</option>
+                <option value="pending">Pending</option>
+                <option value="lulus">Lulus</option>
+                <option value="tidak_lulus">Tidak Lulus</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -163,16 +242,13 @@ const AdminApplicants = () => {
                         app.admissionStatus === 'lulus' ? 'bg-green-100 text-green-700' :
                         app.admissionStatus === 'tidak_lulus' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
                       }`}>
-                        {app.admissionStatus?.replace('_', ' ')}
+                        {(app.admissionStatus || 'pending').replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button 
-                          onClick={() => {
-                            setSelectedApplicant(app);
-                            setShowDetailModal(true);
-                          }}
+                          onClick={() => handleOpenDetail(app)}
                           className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
                           title="Lihat Detail"
                         >
@@ -322,11 +398,43 @@ const AdminApplicants = () => {
                         selectedApplicant.admissionStatus === 'lulus' ? 'bg-green-100 text-green-700' :
                         selectedApplicant.admissionStatus === 'tidak_lulus' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
                       }`}>
-                        {selectedApplicant.admissionStatus?.replace('_', ' ')}
+                        {(selectedApplicant.admissionStatus || 'pending').replace('_', ' ')}
                       </span>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Exam Results Section */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <Award size={16} /> Hasil Ujian Seleksi
+                </h4>
+                {loadingResults ? (
+                  <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <Loader2 size={16} className="animate-spin" /> Memuat hasil ujian...
+                  </div>
+                ) : examResults.length === 0 ? (
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-slate-500 text-sm italic">
+                    Belum ada hasil ujian yang tersedia
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {examResults.map((result) => (
+                      <div key={result._id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                        <p className="text-xs text-slate-400 font-bold uppercase">{result.examId?.title}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl font-black text-slate-800">{result.score}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                            result.status === 'lulus' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                            {result.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             

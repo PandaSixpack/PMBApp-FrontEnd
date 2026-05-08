@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api/axios';
+import api from '../../api/axios';
 import { 
   UserCircle, 
   FileText, 
@@ -128,7 +128,7 @@ const StudentDashboard = () => {
                   <span className="text-sm font-medium text-slate-600">Hasil Seleksi</span>
                 </div>
                 <span className={`text-sm font-bold capitalize ${data?.admissionStatus === 'lulus' ? 'text-green-600' : 'text-blue-600'}`}>
-                  {data?.admissionStatus?.replace('_', ' ') || 'Dalam Proses'}
+                  {(data?.admissionStatus || 'pending').replace('_', ' ')}
                 </span>
               </div>
             </div>

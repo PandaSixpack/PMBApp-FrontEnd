@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import api from '../../api/axios';
 import { User, MapPin, Phone, School, Save, Loader2, Camera, FileUp } from 'lucide-react';
 
 const Profile = () => {

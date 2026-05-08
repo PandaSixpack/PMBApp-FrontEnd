@@ -1,18 +1,18 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
-import Profile from './pages/Profile';
-import Registration from './pages/Registration';
-import Payment from './pages/Payment';
-import Exam from './pages/Exam';
-import StudentDashboard from './pages/StudentDashboard';
-import AdminStats from './pages/AdminStats';
-import AdminApplicants from './pages/AdminApplicants';
-import AdminExams from './pages/AdminExams';
-import AdminQuestions from './pages/AdminQuestions';
-import AdminPayments from './pages/AdminPayments';
+import Profile from './pages/student/Profile';
+import Registration from './pages/student/Registration';
+import Payment from './pages/student/Payment';
+import Exam from './pages/student/Exam';
+import StudentDashboard from './pages/student/Dashboard';
+import AdminStats from './pages/admin/Dashboard';
+import AdminApplicants from './pages/admin/Applicants';
+import AdminExams from './pages/admin/Exams';
+import AdminQuestions from './pages/admin/Questions';
+import AdminPayments from './pages/admin/Payments';
 
 function App() {
   return (

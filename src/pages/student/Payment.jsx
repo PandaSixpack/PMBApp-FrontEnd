@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import api from '../../api/axios';
 import { CreditCard, Upload, CheckCircle2, XCircle, Clock, Loader2, Info } from 'lucide-react';
 
 const Payment = () => {

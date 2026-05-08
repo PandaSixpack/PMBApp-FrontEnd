@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../api/axios';
+import api from '../../api/axios';
 import { BookOpen, Calendar, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 
 const Registration = () => {
@@ -157,7 +157,7 @@ const Registration = () => {
               <AlertCircle size={20} />
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider">Hasil Akhir</p>
-                <p className="font-bold capitalize">{data.admissionStatus?.replace('_', ' ')}</p>
+                <p className="font-bold capitalize">{(data.admissionStatus || 'pending').replace('_', ' ')}</p>
               </div>
             </div>
           </div>

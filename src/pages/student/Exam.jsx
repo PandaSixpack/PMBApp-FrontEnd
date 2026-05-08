@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import api from '../api/axios';
+import api from '../../api/axios';
 import { Clock, GraduationCap, AlertTriangle, CheckCircle2, Loader2, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
 
 const Exam = () => {
@@ -262,7 +262,7 @@ const Exam = () => {
                       <div className={`w-full py-4 rounded-2xl text-center font-bold border ${
                         result.status === 'lulus' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'
                       }`}>
-                        Skor: {result.score} ({result.status?.replace('_', ' ')})
+                        Skor: {result.score} ({(result.status || 'pending').replace('_', ' ')})
                       </div>
                     ) : (
                       <button
@@ -284,7 +284,7 @@ const Exam = () => {
             }`}>
               <h2 className="text-2xl font-bold">Hasil Seleksi Akhir</h2>
               <p className="mt-2 text-lg opacity-90">
-                Status: <span className="font-bold uppercase tracking-widest">{applicant.admissionStatus?.replace('_', ' ')}</span>
+                Status: <span className="font-bold uppercase tracking-widest">{(applicant.admissionStatus || 'pending').replace('_', ' ')}</span>
               </p>
               <p className="mt-4 text-sm opacity-80 max-w-xl mx-auto">
                 {applicant.admissionStatus === 'lulus' 
