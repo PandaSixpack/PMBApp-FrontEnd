@@ -33,6 +33,7 @@ const AdminApplicants = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [examResults, setExamResults] = useState([]);
   const [loadingResults, setLoadingResults] = useState(false);
+  const [adminNotes, setAdminNotes] = useState('');
 
   useEffect(() => {
     fetchApplicants();
@@ -101,9 +102,11 @@ const AdminApplicants = () => {
 
   const handleStatusChange = async (id, status) => {
     try {
-      await api.put(`/applicants/${id}`, { admissionStatus: status });
+      await api.put(`/applicants/${id}`, { admissionStatus: status, adminNotes });
       const statusText = status.replace('_', ' ').toUpperCase();
       alert(`Status seleksi berhasil diubah menjadi ${statusText}`);
+      setAdminNotes('');
+      setShowDetailModal(false);
       fetchApplicants();
     } catch (err) {
       alert('Gagal mengubah status');
@@ -406,52 +409,101 @@ const AdminApplicants = () => {
               </div>
 
               {/* Exam Results Section */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                  <Award size={16} /> Hasil Ujian Seleksi
-                </h4>
-                {loadingResults ? (
-                  <div className="flex items-center gap-2 text-slate-400 text-sm">
-                    <Loader2 size={16} className="animate-spin" /> Memuat hasil ujian...
-                  </div>
-                ) : examResults.length === 0 ? (
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-slate-500 text-sm italic">
-                    Belum ada hasil ujian yang tersedia
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {examResults.map((result) => (
-                      <div key={result._id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                        <p className="text-xs text-slate-400 font-bold uppercase">{result.examId?.title}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xl font-black text-slate-800">{result.score}</span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                            result.status === 'lulus' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                          }`}>
-                            {result.status}
-                          </span>
+                <div className="space-y-4">
+                  <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <Award size={16} /> Hasil Ujian Seleksi
+                  </h4>
+                  {loadingResults ? (
+                    <div className="flex items-center gap-2 text-slate-400 text-sm">
+                      <Loader2 size={16} className="animate-spin" /> Memuat hasil ujian...
+                    </div>
+                  ) : examResults.length === 0 ? (
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-slate-500 text-sm italic">
+                      Belum ada hasil ujian yang tersedia
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {examResults.map((result) => (
+                        <div key={result._id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                          <p className="text-xs text-slate-400 font-bold uppercase">{result.examId?.title}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xl font-black text-slate-800">{result.score}</span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                              result.status === 'lulus' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                              {result.status}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Admin Action Section */}
+                <div className="space-y-4 pt-4 border-t border-slate-100">
+                  <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                    Keputusan Admin
+                  </h4>
+                  <div className="space-y-4">
+                    <textarea
+                      value={adminNotes}
+                      onChange={(e) => setAdminNotes(e.target.value)}
+                      placeholder="Tambahkan catatan untuk keputusan ini..."
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none text-sm transition-all"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+
+                {/* Admission History */}
+                {selectedApplicant.admissionHistory?.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                      Riwayat Keputusan
+                    </h4>
+                    <div className="space-y-3">
+                      {selectedApplicant.admissionHistory.map((h, i) => (
+                        <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className={`font-bold uppercase ${
+                              h.status === 'lulus' ? 'text-green-600' : 
+                              h.status === 'tidak_lulus' ? 'text-red-600' : 'text-blue-600'
+                            }`}>
+                              {h.status.replace('_', ' ')}
+                            </span>
+                            <span className="text-slate-400">
+                              {new Date(h.changedAt).toLocaleString('id-ID')}
+                            </span>
+                          </div>
+                          <p className="text-slate-600">{h.notes || 'Tanpa catatan'}</p>
+                        </div>
+                      )).reverse()}
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
-            
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-              <button 
-                onClick={() => handleStatusChange(selectedApplicant._id, 'tidak_lulus')}
-                className="px-6 py-2.5 bg-white border border-red-200 text-red-600 rounded-xl text-sm font-bold hover:bg-red-50 transition-all"
-              >
-                Gugurkan
-              </button>
-              <button 
-                onClick={() => handleStatusChange(selectedApplicant._id, 'lulus')}
-                className="px-6 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-bold hover:bg-primary-700 shadow-lg shadow-primary-200 transition-all"
-              >
-                Luluskan
-              </button>
-            </div>
+
+              <div className="p-6 bg-slate-50 border-t border-slate-100 flex flex-wrap justify-end gap-3">
+                <button 
+                  onClick={() => handleStatusChange(selectedApplicant._id, 'menunda')}
+                  className="px-6 py-2.5 bg-white border border-blue-200 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-50 transition-all"
+                >
+                  Tunda
+                </button>
+                <button 
+                  onClick={() => handleStatusChange(selectedApplicant._id, 'tidak_lulus')}
+                  className="px-6 py-2.5 bg-white border border-red-200 text-red-600 rounded-xl text-sm font-bold hover:bg-red-50 transition-all"
+                >
+                  Tolak
+                </button>
+                <button 
+                  onClick={() => handleStatusChange(selectedApplicant._id, 'lulus')}
+                  className="px-6 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-bold hover:bg-primary-700 shadow-lg shadow-primary-200 transition-all"
+                >
+                  Luluskan
+                </button>
+              </div>
           </div>
         </div>
       )}

@@ -122,7 +122,7 @@ const AdminStats = () => {
           <div className="h-80">
             <Bar 
               data={{
-                labels: ['TRPL', 'Bisnis Digital', 'Logistik'],
+                labels: ['D4 TRPL', 'D4 Bisnis Digital', 'D4 Logistik'],
                 datasets: [{
                   label: 'Pendaftar',
                   data: [45, 30, 25],

@@ -240,7 +240,7 @@ const Exam = () => {
                 <div key={exam._id} className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all group">
                   <div className="p-8">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors ${
-                      result ? (result.status === 'lulus' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600') : 'bg-primary-50 text-primary-600'
+                      result ? 'bg-blue-100 text-blue-600' : 'bg-primary-50 text-primary-600'
                     }`}>
                       <GraduationCap size={28} />
                     </div>
@@ -259,10 +259,9 @@ const Exam = () => {
                     </div>
 
                     {result ? (
-                      <div className={`w-full py-4 rounded-2xl text-center font-bold border ${
-                        result.status === 'lulus' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'
-                      }`}>
-                        Skor: {result.score} ({(result.status || 'pending').replace('_', ' ')})
+                      <div className="w-full py-4 rounded-2xl text-center font-bold border bg-blue-50 text-blue-700 border-blue-100">
+                        <CheckCircle2 size={18} className="inline-block mr-2" />
+                        Sudah Dikerjakan
                       </div>
                     ) : (
                       <button

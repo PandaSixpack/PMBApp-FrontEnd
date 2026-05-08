@@ -12,9 +12,9 @@ const Registration = () => {
   });
 
   const majors = [
-    'Teknologi Rekayasa Perangkat Lunak',
-    'Bisnis Digital',
-    'Logistik'
+    'D4 Teknologi Rekayasa Perangkat Lunak',
+    'D4 Bisnis Digital',
+    'D4 Logistik'
   ];
 
   useEffect(() => {
@@ -90,7 +90,7 @@ const Registration = () => {
                   <p className={`font-semibold ${data.selectedMajor === major ? 'text-primary-700' : 'text-slate-700'}`}>
                     {major}
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">Program Sarjana (S1)</p>
+                  <p className="text-xs text-slate-500 mt-1">Program Sarjana Terapan (D4)</p>
                 </button>
               ))}
             </div>

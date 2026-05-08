@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../api/axios';
+import api, { BASE_URL } from '../../api/axios';
 import { 
   CreditCard, 
   CheckCircle2, 
@@ -90,7 +90,7 @@ const AdminPayments = () => {
                     </td>
                     <td className="px-6 py-4">
                       <a 
-                        href={`http://localhost:5000/${payment.proof}`} 
+                        href={`${BASE_URL}/${payment.proof}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-sm font-bold text-primary-600 hover:text-primary-700 hover:underline"

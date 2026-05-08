@@ -40,6 +40,8 @@ const DashboardLayout = ({ children }) => {
     { name: 'Ujian', icon: ClipboardList, path: '/admin/exams' },
     { name: 'Kelola Soal', icon: FileText, path: '/admin/questions' },
     { name: 'Pembayaran', icon: CreditCard, path: '/admin/payments' },
+    { name: 'Pengumuman', icon: FileText, path: '/admin/announcements' },
+    { name: 'Konten Web', icon: Settings, path: '/admin/pages' },
   ];
 
   const navItems = user?.role === 'admin' ? adminNav : studentNav;
