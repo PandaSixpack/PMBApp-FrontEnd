@@ -176,7 +176,7 @@ const Exam = () => {
               <ChevronLeft size={20} /> Kembali
             </button>
 
-            <div className="flex-1 flex justify-center gap-2 overflow-x-auto px-4 no-scrollbar hidden md:flex">
+            <div className="flex-1 justify-center gap-2 overflow-x-auto px-4 no-scrollbar hidden md:flex">
               {questions.map((_, idx) => (
                 <button
                   key={idx}
